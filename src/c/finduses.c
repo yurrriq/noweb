@@ -11,26 +11,34 @@ static struct keepalive { char *s; struct keepalive *p; } keepalive[] =
 #include "match.h"
 #include "getline.h"
 #include "recognize.h"
-#line 23 "finduses.nw"
+#line 42 "finduses.nw"
 static Recognizer nwindex;
 #define ALPHANUM "_'@ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789#"
 #define SYMBOLS "!%^&*-+:=|~<>./?`"
+#define LISP_ALPHANUM "~<>./?=!%^&*-+_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+#define LISP_SYMBOLS "()#'@:|`"
+#define FINDUSES_LISP "FINDUSES_LISP"
 /* note $ and \ both delimiters */
-#line 31 "finduses.nw"
+#line 53 "finduses.nw"
 static int showquotes = 1;
-#line 97 "finduses.nw"
+#line 126 "finduses.nw"
 typedef struct line_and_outfile {
     char *line;
     FILE *out;
 } LineOut;
-#line 66 "finduses.nw"
+#line 95 "finduses.nw"
 static void read_ids(FILE *in);
-#line 102 "finduses.nw"
+#line 131 "finduses.nw"
 static void add_use_markers(FILE *in, FILE *out);
-#line 154 "finduses.nw"
+#line 183 "finduses.nw"
 static void write_index_use(void *closure, char *id, char *instance);
 static char *emit_up_to(FILE *f, char *s, char *limit);
 #line 35 "finduses.nw"
+int is_lisp() {
+    char *lisp = getenv(FINDUSES_LISP);
+    return (lisp && atoi(lisp) ? 1 : 0);
+}
+#line 58 "finduses.nw"
 int main(int argc, char **argv) {
     FILE *fp;
     int i;
@@ -41,21 +49,27 @@ int main(int argc, char **argv) {
             showquotes = 0;
         else
             errormsg(Error, "%s: unknown option %s\n", progname, argv[i]);
-    nwindex = new_recognizer(ALPHANUM, SYMBOLS);
+    /* Start GF modification */
+    /* nwindex = new_recognizer(ALPHANUM, SYMBOLS); */
+    if (is_lisp())
+        nwindex = new_recognizer(LISP_ALPHANUM, LISP_SYMBOLS);
+    else
+        nwindex = new_recognizer(ALPHANUM, SYMBOLS);
+    /* end GF modification */
     if (i == argc) {
        
-#line 77 "finduses.nw"
+#line 106 "finduses.nw"
 {   FILE *tmp = tmpfile();
     char *line;
     if (tmp == NULL) 
-#line 157 "finduses.nw"
+#line 186 "finduses.nw"
 errormsg(Fatal, "%s: couldn't open temporary file\n", progname);
-#line 80 "finduses.nw"
+#line 109 "finduses.nw"
     while ((line = getline_nw(stdin)) != NULL) {
         if (fputs(line, tmp) == EOF) 
-#line 159 "finduses.nw"
+#line 188 "finduses.nw"
 errormsg(Fatal, "%s: error writing temporary file\n", progname);
-#line 82 "finduses.nw"
+#line 111 "finduses.nw"
         if (is_index(line, "defn")) {
             if (line[strlen(line)-1] == '\n') line[strlen(line)-1] = 0;
             add_ident(nwindex, line+1+5+1+4+1);
@@ -70,10 +84,10 @@ errormsg(Fatal, "%s: error writing temporary file\n", progname);
     stop_adding(nwindex);
     add_use_markers(tmp, stdout);
 }
-#line 48 "finduses.nw"
+#line 77 "finduses.nw"
     } else {
        
-#line 58 "finduses.nw"
+#line 87 "finduses.nw"
 for (; i < argc; i++)
     if ((fp=fopen(argv[i],"r"))==NULL)
         errormsg(Error, "%s: couldn't open file %s\n", progname, argv[i]);
@@ -81,14 +95,14 @@ for (; i < argc; i++)
         read_ids(fp);
         fclose(fp);
     }
-#line 50 "finduses.nw"
+#line 79 "finduses.nw"
        stop_adding(nwindex);
        add_use_markers(stdin, stdout);
     }
     nowebexit(NULL);
     return errorlevel;          /* slay warning */
 }
-#line 68 "finduses.nw"
+#line 97 "finduses.nw"
 static void read_ids(FILE *in) {
     char *line;
     while ((line = getline_nw(in)) != NULL) {
@@ -96,7 +110,7 @@ static void read_ids(FILE *in) {
         add_ident(nwindex, line);
     }
 }
-#line 104 "finduses.nw"
+#line 133 "finduses.nw"
 static void add_use_markers(FILE *in, FILE *out) {
     char *line;
     int incode = 0;
@@ -116,14 +130,14 @@ static void add_use_markers(FILE *in, FILE *out) {
             fprintf(out, "%s", line);
     }       
 }
-#line 135 "finduses.nw"
+#line 164 "finduses.nw"
 static void write_index_use(void *closure, char *id, char *instance) {
   LineOut *info = (LineOut *) closure;
   info->line = emit_up_to(info->out, info->line, instance);
   fprintf(info->out, "@index use %s\n", id);
   info->line = emit_up_to(info->out, info->line, instance + strlen(id));
 }
-#line 142 "finduses.nw"
+#line 171 "finduses.nw"
 static char *emit_up_to(FILE *f, char *s, char *limit) {
   if (s < limit) {
     char saved = *limit;
