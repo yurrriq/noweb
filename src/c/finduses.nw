@@ -19,10 +19,29 @@ These choices of alphanumerics and symbols seem to work for most languages.
 Making [[@]] alphanumeric helps {\LaTeX}, and making [[#]]
 alphanumeric helps avoid false hits on C preprocessor directives like
 [[#define]] and [[#include]].
+
+2006 02 21 GF: I have discovered that the default choices aren't good
+enough for lisp. To remedy this, following a suggestion from NR, I
+have implemented a test on the envt. variable FINDUSES_LISP. If this
+variable is not ``0'' then lisp symbol and alphnumerics are
+used. Otherwise the defaults are used.
+
+2006 03 06 GF: slight update to be more efficient!
+
+<<test envt for lisp usage>>=
+int is_lisp(){
+  char *lisp = getenv(FINDUSES_LISP);
+  return (lisp && atoi(lisp)  ? 1 : 0);
+}
+@ %def is_lisp
+
 <<*>>=
 static Recognizer nwindex;
 #define ALPHANUM "_'@ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789#"
 #define SYMBOLS "!%^&*-+:=|~<>./?`"
+#define LISP_ALPHANUM "~<>./?=!%^&*-+_ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+#define LISP_SYMBOLS "()#'@:|`"
+#define FINDUSES_LISP "FINDUSES_LISP"
 /* note $ and \ both delimiters */
 @ 
 
@@ -31,6 +50,7 @@ By default, find uses within quoted code ([[[[...]]]]).
 static int showquotes = 1;
 <<typedefs>>
 <<local prototypes>>
+<<test envt for lisp usage>>
 <<*>>=
 int main(int argc, char **argv) {
     FILE *fp;
@@ -42,7 +62,13 @@ int main(int argc, char **argv) {
             showquotes = 0;
         else
             errormsg(Error, "%s: unknown option %s\n", progname, argv[i]);
-    nwindex = new_recognizer(ALPHANUM, SYMBOLS);
+    /* Start GF modification */
+    /* nwindex = new_recognizer(ALPHANUM, SYMBOLS); */
+    if (is_lisp())
+      nwindex = new_recognizer(LISP_ALPHANUM, LISP_SYMBOLS);
+    else
+      nwindex = new_recognizer(ALPHANUM, SYMBOLS);
+    /* end GF modification */
     if (i == argc) {
        <<add uses to stdin, grabbing defns from stdin>>
     } else {
