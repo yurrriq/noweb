@@ -26,10 +26,13 @@ used. Otherwise the defaults are used.
 
 2006 03 06 GF: slight update to be more efficient!
 
+2017 01 23 EB: Update GF's Lisp additions to work with noweb v2.11b
+and better match its style.
+
 <<test envt for lisp usage>>=
-int is_lisp(){
-  char *lisp = getenv(FINDUSES_LISP);
-  return (lisp && atoi(lisp)  ? 1 : 0);
+int is_lisp() {
+    char *lisp = getenv(FINDUSES_LISP);
+    return (lisp && atoi(lisp) ? 1 : 0);
 }
 @ %def is_lisp
 
@@ -50,7 +53,7 @@ static int showquotes = 1;
 <<local prototypes>>
 <<test envt for lisp usage>>
 <<*>>=
-main(int argc, char **argv) {
+int main(int argc, char **argv) {
     FILE *fp;
     int i;
 
@@ -63,9 +66,9 @@ main(int argc, char **argv) {
     /* Start GF modification */
     /* nwindex = new_recognizer(ALPHANUM, SYMBOLS); */
     if (is_lisp())
-      nwindex = new_recognizer(LISP_ALPHANUM, LISP_SYMBOLS);
+        nwindex = new_recognizer(LISP_ALPHANUM, LISP_SYMBOLS);
     else
-      nwindex = new_recognizer(ALPHANUM, SYMBOLS);
+        nwindex = new_recognizer(ALPHANUM, SYMBOLS);
     /* end GF modification */
     if (i == argc) {
        <<add uses to stdin, grabbing defns from stdin>>
@@ -131,7 +134,7 @@ static void add_use_markers(FILE *in, FILE *out) {
     LineOut info; info.line = (char *)0; info.out = out;
     
     while ((line = getline(in)) != NULL) {
-        if (is_begin(line, "code") || showquotes && is_keyword(line, "quote"))
+        if (is_begin(line, "code") || (showquotes && is_keyword(line, "quote")))
             incode = 1;
         else if (is_end(line, "code") || is_keyword(line, "endquote"))
             incode = 0;
