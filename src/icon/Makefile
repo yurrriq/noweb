@@ -11,7 +11,7 @@ LIBEXECS=totex disambiguate noidx tohtml elide l2h docs2comments \
 	xchunks pipedocs
 LIBSPECIAL=autodefs.cee
 BINEXECS=noindex sl2h htmltoc
-EXECS=$(LIBEXECS) $(BINEXECS) $(LIBSPECIAL) pdcached
+EXECS=$(LIBEXECS) $(BINEXECS) $(LIBSPECIAL) # FIXME: pdcached
 SRCS=totex.icn disambiguate.icn noidx.icn texdefs.icn icondefs.icn \
         yaccdefs.icn noindex.icn smldefs.icn tohtml.icn cdefs.icn elide.icn \
 	l2h.icn sl2h.icn pascaldefs.icn promeladefs.icn lrtldefs.icn asdldefs.icn \
