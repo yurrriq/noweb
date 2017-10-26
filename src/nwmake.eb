@@ -4,4 +4,12 @@
 TEXINPUTS=$(kpsewhich -var-value=TEXMFHOME)/tex/latex
 mkdir -p ~/{bin,lib/noweb,share/man} $TEXINPUTS
 
-make -BC src -e LIBSRC=icon ICONC=icont CFLAGS='-U_POSIX_C_SOURCE -D_POSIX_C_SOURCE=1' BIN=~/bin LIB=~/lib/noweb MAN=~/share/man TEXINPUTS=$TEXINPUTS boot all install
+MAKE="make -BC src -e LIBSRC=icon ICONC=icont CFLAGS='-U_POSIX_C_SOURCE -D_POSIX_C_SOURCE=1' BIN=~/bin LIB=~/lib/noweb MAN=~/share/man TEXINPUTS=$TEXINPUTS"
+
+eval $MAKE boot all
+
+pushd src
+sh awkname awk
+popd
+
+eval $MAKE install
