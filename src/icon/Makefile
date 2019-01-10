@@ -7,15 +7,16 @@ CPIF=| cpif		# change to ">" to insure all sources always made
 
 LIBEXECS=totex disambiguate noidx tohtml elide l2h docs2comments \
        autodefs.tex autodefs.icon autodefs.yacc autodefs.sml autodefs.pascal \
-	autodefs.promela autodefs.lrtl autodefs.asdl autodefs.mmix xchunks pipedocs
+	autodefs.promela autodefs.lrtl autodefs.asdl autodefs.mmix autodefs.lisp \
+	xchunks pipedocs
 LIBSPECIAL=autodefs.cee
 BINEXECS=noindex sl2h htmltoc
 EXECS=$(LIBEXECS) $(BINEXECS) $(LIBSPECIAL) pdcached
 SRCS=totex.icn disambiguate.icn noidx.icn texdefs.icn icondefs.icn \
         yaccdefs.icn noindex.icn smldefs.icn tohtml.icn cdefs.icn elide.icn \
 	l2h.icn sl2h.icn pascaldefs.icn promeladefs.icn lrtldefs.icn asdldefs.icn \
-	mmixdefs.icn htmltoc.icn xchunks.icn docs2comments.icn pipedocs.icn pdcached.icn
-
+	mmixdefs.icn htmltoc.icn xchunks.icn docs2comments.icn pipedocs.icn pdcached.icn \
+	lispdefs.icn
 .SUFFIXES: .nw .icn .html .tex .dvi
 .nw.icn:
 	notangle -L'#line %-1L "%F"%N' $*.nw $(CPIF) $*.icn
@@ -74,6 +75,9 @@ asdldefs.icn: asdldefs.nw defns.nw
 mmixdefs.icn: mmixdefs.nw defns.nw
 	notangle -L'#line %-1L "%F"%N' mmixdefs.nw defns.nw $(CPIF) mmixdefs.icn
 
+lispdefs.icn: lispdefs.nw defns.nw
+	notangle -L'#line %-1L "%F"%N' lispdefs.nw defns.nw $(CPIF) lispdefs.icn
+
 autodefs.tex: texdefs.icn
 	$(ICONT) -o autodefs.tex texdefs.icn
 
@@ -103,6 +107,9 @@ autodefs.asdl: asdldefs.icn
 
 autodefs.mmix: mmixdefs.icn
 	$(ICONT) -o autodefs.mmix mmixdefs.icn
+
+autodefs.lisp: lispdefs.icn
+	$(ICONT) -o autodefs.lisp lispdefs.icn
 
 totex: totex.icn
 	$(ICONC) totex.icn
